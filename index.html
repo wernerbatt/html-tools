@@ -5,6 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Tools Collection</title>
     <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --text-tertiary: #6a737d;
+            --border-color: #eaecef;
+            --border-color-heavy: #d1d5da;
+            --link-color: #0366d6;
+            --link-hover: #0366d6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0d1117;
+                --bg-secondary: #161b22;
+                --text-primary: #c9d1d9;
+                --text-secondary: #8b949e;
+                --text-tertiary: #6e7681;
+                --border-color: #30363d;
+                --border-color-heavy: #21262d;
+                --link-color: #58a6ff;
+                --link-hover: #58a6ff;
+            }
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --text-tertiary: #6a737d;
+            --border-color: #eaecef;
+            --border-color-heavy: #d1d5da;
+            --link-color: #0366d6;
+            --link-hover: #0366d6;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --text-tertiary: #6e7681;
+            --border-color: #30363d;
+            --border-color-heavy: #21262d;
+            --link-color: #58a6ff;
+            --link-hover: #58a6ff;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,34 +64,35 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
             line-height: 1.6;
-            color: #24292e;
-            background: #ffffff;
+            color: var(--text-primary);
+            background: var(--bg-primary);
             padding: 20px;
             max-width: 980px;
             margin: 0 auto;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         header {
             margin-bottom: 40px;
             padding-bottom: 20px;
-            border-bottom: 2px solid #eaecef;
+            border-bottom: 2px solid var(--border-color);
         }
 
         h1 {
             font-size: 32px;
             font-weight: 600;
             margin-bottom: 10px;
-            color: #24292e;
+            color: var(--text-primary);
         }
 
         .subtitle {
             font-size: 16px;
-            color: #586069;
+            color: var(--text-secondary);
             margin-bottom: 15px;
         }
 
         .github-link {
-            color: #0366d6;
+            color: var(--link-color);
             text-decoration: none;
             font-size: 14px;
         }
@@ -59,8 +110,8 @@
             font-weight: 600;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 1px solid #eaecef;
-            color: #24292e;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
         }
 
         .tool-list {
@@ -73,7 +124,7 @@
         }
 
         .tool-list a {
-            color: #0366d6;
+            color: var(--link-color);
             text-decoration: none;
             font-size: 15px;
         }
@@ -83,7 +134,7 @@
         }
 
         .tool-description {
-            color: #586069;
+            color: var(--text-secondary);
             font-size: 14px;
             margin-left: 5px;
         }
@@ -91,13 +142,18 @@
         footer {
             margin-top: 60px;
             padding-top: 20px;
-            border-top: 1px solid #eaecef;
-            color: #586069;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
             font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         code {
-            background: #f6f8fa;
+            background: var(--bg-secondary);
             padding: 2px 6px;
             border-radius: 3px;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -105,12 +161,12 @@
         }
 
         .stats {
-            background: #f6f8fa;
+            background: var(--bg-secondary);
             padding: 15px;
             border-radius: 6px;
             margin-bottom: 30px;
             font-size: 14px;
-            color: #586069;
+            color: var(--text-secondary);
         }
 
         .recent-container {
@@ -129,7 +185,7 @@
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 12px;
-            color: #24292e;
+            color: var(--text-primary);
         }
 
         .recent-item {
@@ -137,8 +193,40 @@
         }
 
         .recent-date {
-            color: #6a737d;
+            color: var(--text-tertiary);
             font-size: 13px;
+        }
+
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--link-color);
+            color: var(--link-color);
+        }
+
+        .theme-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .about-text {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.7;
         }
     </style>
 </head>
@@ -176,7 +264,7 @@
 
         <section>
             <h2>About These Tools</h2>
-            <p style="color: #586069; font-size: 15px; line-height: 1.7;">
+            <p class="about-text">
                 This collection contains single-file HTML tools built with the assistance of
                 <a href="https://claude.com/claude-code" class="github-link">Claude Code</a>.
                 Each tool is completely self-contained with inline CSS and JavaScript, requiring no build process or external dependencies
@@ -187,7 +275,7 @@
 
         <section>
             <h2>Contributing</h2>
-            <p style="color: #586069; font-size: 15px; line-height: 1.7;">
+            <p class="about-text">
                 These tools are open source and available on <a href="https://github.com/wernerbatt/html-tools" class="github-link">GitHub</a>.
                 Feel free to submit issues or pull requests with improvements or new tools.
             </p>
@@ -196,6 +284,65 @@
 
     <footer>
         <p>Built with <a href="https://claude.com/claude-code" class="github-link">Claude Code</a></p>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <svg class="theme-icon" id="themeIcon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                <!-- SVG will be updated by JavaScript -->
+            </svg>
+            <span id="themeLabel">Auto</span>
+        </button>
     </footer>
+
+    <script>
+        // Theme icons as SVG paths
+        const icons = {
+            auto: '<path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0Z"/><path d="M8 0a8 8 0 0 1 0 16V0Z"/>',
+            light: '<path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8ZM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0Zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13Zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5ZM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8Zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0Zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0Zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707ZM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708Z"/>',
+            dark: '<path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278Z"/>'
+        };
+
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeLabel = document.getElementById('themeLabel');
+
+        // Theme states: auto, light, dark
+        const themes = ['auto', 'light', 'dark'];
+        let currentThemeIndex = 0;
+
+        // Load theme from localStorage
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('htmlToolsTheme');
+            if (savedTheme && themes.includes(savedTheme)) {
+                currentThemeIndex = themes.indexOf(savedTheme);
+            }
+            applyTheme();
+        }
+
+        // Apply theme to document
+        function applyTheme() {
+            const theme = themes[currentThemeIndex];
+
+            if (theme === 'auto') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+
+            // Update icon and label
+            themeIcon.innerHTML = icons[theme];
+            themeLabel.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+
+            // Save to localStorage
+            localStorage.setItem('htmlToolsTheme', theme);
+        }
+
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            applyTheme();
+        });
+
+        // Initialize theme on page load
+        loadTheme();
+    </script>
 </body>
 </html>
