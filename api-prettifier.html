@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Prettifier - JSON/XML Formatter</title>
+
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: #1e1e1e;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #007acc;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            height: calc(100vh - 140px);
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: #f8f8f8;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .stats {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        #input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+        }
+
+        #output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow: auto;
+            height: 100%;
+        }
+
+        #output.error {
+            color: #f48771;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #007acc;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #005a9e;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 122, 204, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #5c5c5c;
+        }
+
+        button.secondary:hover {
+            background: #424242;
+        }
+
+        button.success {
+            background: #28a745;
+        }
+
+        button.success:hover {
+            background: #218838;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        button.danger:hover {
+            background: #c82333;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .format-indicator {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #007acc;
+            color: #fff;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .format-indicator.json {
+            background: #f0db4f;
+            color: #333;
+        }
+
+        .format-indicator.xml {
+            background: #e44d26;
+            color: #fff;
+        }
+
+        .format-indicator.invalid {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        /* Prism.js override for dark theme */
+        #output pre {
+            background: transparent !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        #output code {
+            background: transparent !important;
+            color: inherit;
+        }
+
+        .line-numbers {
+            counter-reset: linenumber;
+        }
+
+        .line-numbers .line {
+            counter-increment: linenumber;
+            position: relative;
+            padding-left: 50px;
+        }
+
+        .line-numbers .line::before {
+            content: counter(linenumber);
+            position: absolute;
+            left: 0;
+            width: 40px;
+            text-align: right;
+            color: #858585;
+            font-size: 12px;
+            user-select: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive design */
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .panel {
+                min-height: 400px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        #input::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #input::-webkit-scrollbar-thumb {
+            background: #ccc;
+        }
+
+        #input::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>API Prettifier</h1>
+        <p>Format and validate JSON/XML API responses with syntax highlighting</p>
+    </div>
+
+    <div class="container">
+        <!-- Input Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Input</h2>
+                <div class="stats">
+                    <span id="charCount">0 characters</span> |
+                    <span id="lineCount">0 lines</span>
+                </div>
+            </div>
+            <div class="panel-content">
+                <textarea id="input" placeholder="Paste your JSON or XML here..."></textarea>
+            </div>
+        </div>
+
+        <!-- Output Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <h2 style="display: inline-block; margin-right: 10px;">Output</h2>
+                    <span id="formatIndicator" class="format-indicator" style="display: none;">Unknown</span>
+                </div>
+                <div class="controls">
+                    <button id="validateBtn" class="secondary">Validate</button>
+                    <button id="prettifyBtn">Prettify</button>
+                    <button id="minifyBtn" class="secondary">Minify</button>
+                    <button id="copyBtn" class="success">Copy</button>
+                    <button id="clearBtn" class="danger">Clear</button>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div id="output">Formatted output will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <!-- Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const charCount = document.getElementById('charCount');
+        const lineCount = document.getElementById('lineCount');
+        const formatIndicator = document.getElementById('formatIndicator');
+        const notification = document.getElementById('notification');
+
+        const prettifyBtn = document.getElementById('prettifyBtn');
+        const minifyBtn = document.getElementById('minifyBtn');
+        const validateBtn = document.getElementById('validateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        let currentFormat = 'unknown';
+
+        // Load saved input from localStorage
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('apiPrettifierInput');
+            if (saved) {
+                input.value = saved;
+                updateStats();
+                autoPrettify();
+            }
+        });
+
+        // Auto-save input to localStorage
+        input.addEventListener('input', () => {
+            localStorage.setItem('apiPrettifierInput', input.value);
+            updateStats();
+        });
+
+        // Auto-format on paste
+        input.addEventListener('paste', () => {
+            setTimeout(autoPrettify, 10);
+        });
+
+        // Update character and line count
+        function updateStats() {
+            const text = input.value;
+            charCount.textContent = `${text.length} characters`;
+            lineCount.textContent = `${text.split('\n').length} lines`;
+        }
+
+        // Detect format (JSON or XML)
+        function detectFormat(text) {
+            const trimmed = text.trim();
+            if (!trimmed) return 'unknown';
+
+            if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                return 'json';
+            } else if (trimmed.startsWith('<')) {
+                return 'xml';
+            }
+
+            return 'unknown';
+        }
+
+        // Update format indicator
+        function updateFormatIndicator(format, isValid = true) {
+            currentFormat = format;
+            formatIndicator.style.display = 'inline-block';
+
+            if (!isValid) {
+                formatIndicator.textContent = 'Invalid';
+                formatIndicator.className = 'format-indicator invalid';
+            } else if (format === 'json') {
+                formatIndicator.textContent = 'JSON';
+                formatIndicator.className = 'format-indicator json';
+            } else if (format === 'xml') {
+                formatIndicator.textContent = 'XML';
+                formatIndicator.className = 'format-indicator xml';
+            } else {
+                formatIndicator.textContent = 'Unknown';
+                formatIndicator.className = 'format-indicator';
+            }
+        }
+
+        // Show notification
+        function showNotification(message, duration = 2000) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+
+        // Prettify JSON
+        function prettifyJSON(text) {
+            try {
+                const parsed = JSON.parse(text);
+                const formatted = JSON.stringify(parsed, null, 2);
+                return { success: true, result: formatted };
+            } catch (e) {
+                return { success: false, error: e.message };
+            }
+        }
+
+        // Minify JSON
+        function minifyJSON(text) {
+            try {
+                const parsed = JSON.parse(text);
+                const minified = JSON.stringify(parsed);
+                return { success: true, result: minified };
+            } catch (e) {
+                return { success: false, error: e.message };
+            }
+        }
+
+        // Prettify XML
+        function prettifyXML(text) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+                // Check for parsing errors
+                const parserError = xmlDoc.querySelector('parsererror');
+                if (parserError) {
+                    return { success: false, error: 'Invalid XML' };
+                }
+
+                const formatted = formatXML(xmlDoc);
+                return { success: true, result: formatted };
+            } catch (e) {
+                return { success: false, error: e.message };
+            }
+        }
+
+        // Format XML with indentation
+        function formatXML(xml) {
+            const serializer = new XMLSerializer();
+            const xmlStr = serializer.serializeToString(xml);
+
+            let formatted = '';
+            let indent = 0;
+            const tab = '  ';
+
+            xmlStr.split(/>\s*</).forEach((node) => {
+                if (node.match(/^\/\w/)) indent--;
+                formatted += tab.repeat(indent) + '<' + node + '>\n';
+                if (node.match(/^<?\w[^>]*[^\/]$/)) indent++;
+            });
+
+            return formatted.substring(1, formatted.length - 2);
+        }
+
+        // Minify XML
+        function minifyXML(text) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+                const parserError = xmlDoc.querySelector('parsererror');
+                if (parserError) {
+                    return { success: false, error: 'Invalid XML' };
+                }
+
+                const serializer = new XMLSerializer();
+                const minified = serializer.serializeToString(xmlDoc).replace(/>\s+</g, '><');
+                return { success: true, result: minified };
+            } catch (e) {
+                return { success: false, error: e.message };
+            }
+        }
+
+        // Add line numbers to output
+        function addLineNumbers(text) {
+            const lines = text.split('\n');
+            return lines.map(line => `<div class="line">${escapeHtml(line)}</div>`).join('');
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Display output with syntax highlighting
+        function displayOutput(text, format, isError = false) {
+            output.classList.remove('error');
+
+            if (isError) {
+                output.classList.add('error');
+                output.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
+                return;
+            }
+
+            if (format === 'json') {
+                const highlighted = Prism.highlight(text, Prism.languages.json, 'json');
+                const lines = highlighted.split('\n');
+                const withLineNumbers = lines.map(line => `<div class="line">${line}</div>`).join('');
+                output.innerHTML = `<pre class="line-numbers"><code class="language-json">${withLineNumbers}</code></pre>`;
+            } else if (format === 'xml') {
+                const highlighted = Prism.highlight(text, Prism.languages.markup, 'markup');
+                const lines = highlighted.split('\n');
+                const withLineNumbers = lines.map(line => `<div class="line">${line}</div>`).join('');
+                output.innerHTML = `<pre class="line-numbers"><code class="language-markup">${withLineNumbers}</code></pre>`;
+            } else {
+                output.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
+            }
+        }
+
+        // Auto-prettify
+        function autoPrettify() {
+            const text = input.value.trim();
+            if (!text) {
+                output.innerHTML = 'Formatted output will appear here...';
+                formatIndicator.style.display = 'none';
+                return;
+            }
+
+            const format = detectFormat(text);
+            let result;
+
+            if (format === 'json') {
+                result = prettifyJSON(text);
+                if (result.success) {
+                    displayOutput(result.result, 'json');
+                    updateFormatIndicator('json', true);
+                } else {
+                    displayOutput(`JSON Error: ${result.error}`, 'json', true);
+                    updateFormatIndicator('json', false);
+                }
+            } else if (format === 'xml') {
+                result = prettifyXML(text);
+                if (result.success) {
+                    displayOutput(result.result, 'xml');
+                    updateFormatIndicator('xml', true);
+                } else {
+                    displayOutput(`XML Error: ${result.error}`, 'xml', true);
+                    updateFormatIndicator('xml', false);
+                }
+            } else {
+                displayOutput('Unable to detect format. Please enter valid JSON or XML.', 'unknown', true);
+                updateFormatIndicator('unknown', false);
+            }
+        }
+
+        // Button event handlers
+        prettifyBtn.addEventListener('click', autoPrettify);
+
+        minifyBtn.addEventListener('click', () => {
+            const text = input.value.trim();
+            if (!text) {
+                showNotification('Nothing to minify');
+                return;
+            }
+
+            const format = detectFormat(text);
+            let result;
+
+            if (format === 'json') {
+                result = minifyJSON(text);
+            } else if (format === 'xml') {
+                result = minifyXML(text);
+            } else {
+                showNotification('Unable to detect format');
+                return;
+            }
+
+            if (result.success) {
+                displayOutput(result.result, format);
+                updateFormatIndicator(format, true);
+                showNotification('Minified successfully');
+            } else {
+                displayOutput(`Error: ${result.error}`, format, true);
+                updateFormatIndicator(format, false);
+                showNotification('Minification failed');
+            }
+        });
+
+        validateBtn.addEventListener('click', () => {
+            const text = input.value.trim();
+            if (!text) {
+                showNotification('Nothing to validate');
+                return;
+            }
+
+            const format = detectFormat(text);
+            let result;
+
+            if (format === 'json') {
+                result = prettifyJSON(text);
+            } else if (format === 'xml') {
+                result = prettifyXML(text);
+            } else {
+                showNotification('Unable to detect format');
+                updateFormatIndicator('unknown', false);
+                return;
+            }
+
+            if (result.success) {
+                showNotification(`Valid ${format.toUpperCase()}`);
+                updateFormatIndicator(format, true);
+            } else {
+                showNotification(`Invalid ${format.toUpperCase()}: ${result.error}`, 3000);
+                updateFormatIndicator(format, false);
+            }
+        });
+
+        copyBtn.addEventListener('click', async () => {
+            const text = output.textContent;
+            if (!text || text === 'Formatted output will appear here...') {
+                showNotification('Nothing to copy');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(text);
+                showNotification('Copied to clipboard!');
+            } catch (e) {
+                showNotification('Failed to copy');
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            output.innerHTML = 'Formatted output will appear here...';
+            formatIndicator.style.display = 'none';
+            localStorage.removeItem('apiPrettifierInput');
+            updateStats();
+            showNotification('Cleared');
+        });
+    </script>
+</body>
+</html>
