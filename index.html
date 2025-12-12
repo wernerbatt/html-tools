@@ -3,13 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My HTML Tools</title>
+    <title>HTML Tools Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            background: #ffffff;
+            padding: 20px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eaecef;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #24292e;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #586069;
+            margin-bottom: 15px;
+        }
+
+        .github-link {
+            color: #0366d6;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .github-link:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eaecef;
+            color: #24292e;
+        }
+
+        .tool-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tool-list li {
+            margin: 8px 0;
+        }
+
+        .tool-list a {
+            color: #0366d6;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .tool-list a:hover {
+            text-decoration: underline;
+        }
+
+        .tool-description {
+            color: #586069;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #eaecef;
+            color: #586069;
+            font-size: 14px;
+        }
+
+        code {
+            background: #f6f8fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .stats {
+            background: #f6f8fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #586069;
+        }
+
+        .recent-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .recent-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .recent-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #24292e;
+        }
+
+        .recent-item {
+            margin: 8px 0;
+        }
+
+        .recent-date {
+            color: #6a737d;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
-    <h1>My HTML Tools</h1>
-    <p>Collection of single-file HTML tools</p>
-    <ul>
-        <!-- Tools will be added here -->
-    </ul>
+    <header>
+        <h1>HTML Tools Collection</h1>
+        <p class="subtitle">Miscellaneous HTML+JavaScript tools built with Claude Code</p>
+        <p><a href="https://github.com/wernerbatt/html-tools" class="github-link">View on GitHub</a></p>
+    </header>
+
+    <main>
+        <div class="stats">
+            <strong>1 tool</strong> and counting. All tools are single-file HTML applications that run entirely in your browser.
+        </div>
+
+        <div class="recent-container">
+            <div class="recent-section">
+                <h3>Recently Added</h3>
+                <div class="recent-item">
+                    <a href="api-prettifier.html">API Prettifier</a>
+                    <span class="recent-date">• Just now</span>
+                </div>
+            </div>
+        </div>
+
+        <section>
+            <h2>API and Data Tools</h2>
+            <ul class="tool-list">
+                <li>
+                    <a href="api-prettifier.html">API Prettifier</a>
+                    <span class="tool-description">— Format and validate JSON/XML API responses with syntax highlighting, line numbers, and copy-to-clipboard functionality</span>
+                </li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>About These Tools</h2>
+            <p style="color: #586069; font-size: 15px; line-height: 1.7;">
+                This collection contains single-file HTML tools built with the assistance of
+                <a href="https://claude.com/claude-code" class="github-link">Claude Code</a>.
+                Each tool is completely self-contained with inline CSS and JavaScript, requiring no build process or external dependencies
+                (except for CDN-hosted libraries like Prism.js for syntax highlighting).
+                All tools run entirely client-side in your browser.
+            </p>
+        </section>
+
+        <section>
+            <h2>Contributing</h2>
+            <p style="color: #586069; font-size: 15px; line-height: 1.7;">
+                These tools are open source and available on <a href="https://github.com/wernerbatt/html-tools" class="github-link">GitHub</a>.
+                Feel free to submit issues or pull requests with improvements or new tools.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built with <a href="https://claude.com/claude-code" class="github-link">Claude Code</a></p>
+    </footer>
 </body>
 </html>
