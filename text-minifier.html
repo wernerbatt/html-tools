@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Minifier - Compress Text</title>
+
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-dark: #1e1e1e;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --border-color: #e1e4e8;
+            --accent-color: #007acc;
+            --accent-hover: #005a9e;
+            --success-color: #28a745;
+            --success-hover: #218838;
+            --danger-color: #dc3545;
+            --danger-hover: #c82333;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0d1117;
+                --bg-secondary: #161b22;
+                --bg-dark: #1e1e1e;
+                --text-primary: #c9d1d9;
+                --text-secondary: #8b949e;
+                --border-color: #30363d;
+            }
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-dark: #1e1e1e;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --border-color: #e1e4e8;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-dark: #1e1e1e;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--bg-dark);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .header-nav {
+            margin-top: 10px;
+        }
+
+        .header-nav a {
+            color: #58a6ff;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .header-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            height: calc(100vh - 140px);
+        }
+
+        .panel {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-header {
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .panel-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stats {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 122, 204, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.success {
+            background: var(--success-color);
+        }
+
+        button.success:hover {
+            background: var(--success-hover);
+        }
+
+        button.danger {
+            background: var(--danger-color);
+        }
+
+        button.danger:hover {
+            background: var(--danger-hover);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .options {
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .options h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .option-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-secondary);
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            gap: 5px;
+        }
+
+        .stat-label {
+            font-weight: 600;
+        }
+
+        .reduction {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        /* Responsive design */
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .panel {
+                min-height: 400px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Text Minifier</h1>
+        <p>Compress and minify text by removing unnecessary whitespace and line breaks</p>
+        <div class="header-nav">
+            <a href="index.html">← Back to Tools</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Input Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Input</h2>
+                <div class="stats">
+                    <span id="inputCharCount">0 characters</span> |
+                    <span id="inputLineCount">0 lines</span>
+                </div>
+            </div>
+            <div class="options">
+                <h3>Minification Options</h3>
+                <div class="option-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="removeNewlines" checked>
+                        Remove all newlines
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="trimLines" checked>
+                        Trim line whitespace
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="collapseSpaces" checked>
+                        Collapse multiple spaces
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="removeTabs" checked>
+                        Remove tabs
+                    </label>
+                </div>
+            </div>
+            <div class="panel-content">
+                <textarea id="input" placeholder="Paste your text here to minify..."></textarea>
+            </div>
+        </div>
+
+        <!-- Output Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Output</h2>
+                <div class="controls">
+                    <button id="minifyBtn">Minify</button>
+                    <button id="copyBtn" class="success">Copy</button>
+                    <button id="clearBtn" class="danger">Clear</button>
+                </div>
+            </div>
+            <div class="panel-content">
+                <textarea id="output" placeholder="Minified text will appear here..." readonly></textarea>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">Output:</span>
+                    <span id="outputCharCount">0 characters</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Lines:</span>
+                    <span id="outputLineCount">0 lines</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Reduction:</span>
+                    <span id="reduction" class="reduction">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle">
+        <span id="themeLabel">Auto</span>
+    </button>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const inputCharCount = document.getElementById('inputCharCount');
+        const inputLineCount = document.getElementById('inputLineCount');
+        const outputCharCount = document.getElementById('outputCharCount');
+        const outputLineCount = document.getElementById('outputLineCount');
+        const reduction = document.getElementById('reduction');
+        const notification = document.getElementById('notification');
+
+        const minifyBtn = document.getElementById('minifyBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        const removeNewlinesCheckbox = document.getElementById('removeNewlines');
+        const trimLinesCheckbox = document.getElementById('trimLines');
+        const collapseSpacesCheckbox = document.getElementById('collapseSpaces');
+        const removeTabsCheckbox = document.getElementById('removeTabs');
+
+        // Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        const themeLabel = document.getElementById('themeLabel');
+        const themes = ['auto', 'light', 'dark'];
+        let currentThemeIndex = 0;
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('htmlToolsTheme');
+            if (savedTheme && themes.includes(savedTheme)) {
+                currentThemeIndex = themes.indexOf(savedTheme);
+            }
+            applyTheme();
+        }
+
+        function applyTheme() {
+            const theme = themes[currentThemeIndex];
+            if (theme === 'auto') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            themeLabel.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+            localStorage.setItem('htmlToolsTheme', theme);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            applyTheme();
+        });
+
+        loadTheme();
+
+        // Load saved input and options from localStorage
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('textMinifierInput');
+            if (saved) {
+                input.value = saved;
+                updateInputStats();
+                autoMinify();
+            }
+
+            // Load options
+            const options = JSON.parse(localStorage.getItem('textMinifierOptions') || '{}');
+            if (options.removeNewlines !== undefined) removeNewlinesCheckbox.checked = options.removeNewlines;
+            if (options.trimLines !== undefined) trimLinesCheckbox.checked = options.trimLines;
+            if (options.collapseSpaces !== undefined) collapseSpacesCheckbox.checked = options.collapseSpaces;
+            if (options.removeTabs !== undefined) removeTabsCheckbox.checked = options.removeTabs;
+        });
+
+        // Auto-save input to localStorage
+        input.addEventListener('input', () => {
+            localStorage.setItem('textMinifierInput', input.value);
+            updateInputStats();
+        });
+
+        // Save options when changed
+        function saveOptions() {
+            const options = {
+                removeNewlines: removeNewlinesCheckbox.checked,
+                trimLines: trimLinesCheckbox.checked,
+                collapseSpaces: collapseSpacesCheckbox.checked,
+                removeTabs: removeTabsCheckbox.checked
+            };
+            localStorage.setItem('textMinifierOptions', JSON.stringify(options));
+        }
+
+        removeNewlinesCheckbox.addEventListener('change', saveOptions);
+        trimLinesCheckbox.addEventListener('change', saveOptions);
+        collapseSpacesCheckbox.addEventListener('change', saveOptions);
+        removeTabsCheckbox.addEventListener('change', saveOptions);
+
+        // Auto-minify on paste
+        input.addEventListener('paste', () => {
+            setTimeout(autoMinify, 10);
+        });
+
+        // Update input stats
+        function updateInputStats() {
+            const text = input.value;
+            inputCharCount.textContent = `${text.length} characters`;
+            inputLineCount.textContent = `${text.split('\n').length} lines`;
+        }
+
+        // Update output stats
+        function updateOutputStats(text, originalLength) {
+            outputCharCount.textContent = `${text.length} characters`;
+            outputLineCount.textContent = `${text.split('\n').length} lines`;
+
+            if (originalLength > 0) {
+                const reductionPercent = ((originalLength - text.length) / originalLength * 100).toFixed(1);
+                reduction.textContent = `${reductionPercent}%`;
+            } else {
+                reduction.textContent = '0%';
+            }
+        }
+
+        // Show notification
+        function showNotification(message, duration = 2000) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+
+        // Minify text
+        function minifyText(text) {
+            let result = text;
+            const originalLength = text.length;
+
+            // Remove tabs if option is checked
+            if (removeTabsCheckbox.checked) {
+                result = result.replace(/\t/g, ' ');
+            }
+
+            // Trim lines if option is checked
+            if (trimLinesCheckbox.checked) {
+                result = result.split('\n').map(line => line.trim()).join('\n');
+            }
+
+            // Collapse multiple spaces if option is checked
+            if (collapseSpacesCheckbox.checked) {
+                result = result.replace(/ +/g, ' ');
+            }
+
+            // Remove newlines if option is checked
+            if (removeNewlinesCheckbox.checked) {
+                result = result.replace(/\n+/g, ' ');
+                // Clean up any resulting multiple spaces
+                if (collapseSpacesCheckbox.checked) {
+                    result = result.replace(/ +/g, ' ');
+                }
+            } else {
+                // If not removing newlines, collapse multiple newlines
+                result = result.replace(/\n\n+/g, '\n');
+            }
+
+            // Final trim
+            result = result.trim();
+
+            return result;
+        }
+
+        // Auto-minify
+        function autoMinify() {
+            const text = input.value;
+            if (!text.trim()) {
+                output.value = '';
+                updateOutputStats('', 0);
+                return;
+            }
+
+            const minified = minifyText(text);
+            output.value = minified;
+            updateOutputStats(minified, text.length);
+        }
+
+        // Button event handlers
+        minifyBtn.addEventListener('click', () => {
+            const text = input.value;
+            if (!text.trim()) {
+                showNotification('Nothing to minify');
+                return;
+            }
+
+            autoMinify();
+            showNotification('Text minified successfully');
+        });
+
+        copyBtn.addEventListener('click', async () => {
+            const text = output.value;
+            if (!text) {
+                showNotification('Nothing to copy');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(text);
+                showNotification('Copied to clipboard!');
+            } catch (e) {
+                showNotification('Failed to copy');
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            output.value = '';
+            localStorage.removeItem('textMinifierInput');
+            updateInputStats();
+            updateOutputStats('', 0);
+            showNotification('Cleared');
+        });
+    </script>
+</body>
+</html>
