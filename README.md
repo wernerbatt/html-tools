@@ -4,6 +4,11 @@ Miscellaneous HTML+JavaScript tools built with the help of [Claude Code](https:/
 
 All tools are single-file HTML applications that run entirely in your browser, with no build process or server dependencies required.
 
+## Text Tools
+
+- [Text Minifier](https://wernerbatt.github.io/html-tools/text-minifier.html) — Compress and minify text by removing unnecessary whitespace, line breaks, and tabs
+- [URL Encoder/Decoder](https://wernerbatt.github.io/html-tools/url-encoder.html) — Encode and decode URLs and URI components for safe transmission and API integration
+
 ## API and Data Tools
 
 - [API Prettifier](https://wernerbatt.github.io/html-tools/api-prettifier.html) — Format and validate JSON/XML API responses with syntax highlighting, line numbers, and copy-to-clipboard functionality

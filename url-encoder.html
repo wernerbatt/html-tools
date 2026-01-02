@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Encoder/Decoder - Encode and Decode URLs</title>
+
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-dark: #1e1e1e;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --border-color: #e1e4e8;
+            --accent-color: #007acc;
+            --accent-hover: #005a9e;
+            --success-color: #28a745;
+            --success-hover: #218838;
+            --danger-color: #dc3545;
+            --danger-hover: #c82333;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0d1117;
+                --bg-secondary: #161b22;
+                --bg-dark: #1e1e1e;
+                --text-primary: #c9d1d9;
+                --text-secondary: #8b949e;
+                --border-color: #30363d;
+            }
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-dark: #1e1e1e;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --border-color: #e1e4e8;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-dark: #1e1e1e;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--bg-dark);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .header-nav {
+            margin-top: 10px;
+        }
+
+        .header-nav a {
+            color: #58a6ff;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .header-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            height: calc(100vh - 140px);
+        }
+
+        .panel {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-header {
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .panel-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stats {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 122, 204, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.success {
+            background: var(--success-color);
+        }
+
+        button.success:hover {
+            background: var(--success-hover);
+        }
+
+        button.danger {
+            background: var(--danger-color);
+        }
+
+        button.danger:hover {
+            background: var(--danger-hover);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .info-box {
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .info-box strong {
+            color: var(--text-primary);
+        }
+
+        .example-links {
+            margin-top: 8px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .example-link {
+            color: var(--accent-color);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 12px;
+        }
+
+        .example-link:hover {
+            color: var(--accent-hover);
+        }
+
+        /* Responsive design */
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .panel {
+                min-height: 400px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>URL Encoder/Decoder</h1>
+        <p>Encode and decode URLs and URI components</p>
+        <div class="header-nav">
+            <a href="index.html">← Back to Tools</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Input Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Input</h2>
+                <div class="stats">
+                    <span id="inputCharCount">0 characters</span>
+                </div>
+            </div>
+            <div class="info-box">
+                <strong>Encoding types:</strong> Use "Encode" for full URLs, "Encode Component" for URL parameters/query strings
+                <div class="example-links">
+                    <span class="example-link" onclick="loadExample('url')">Example URL</span>
+                    <span class="example-link" onclick="loadExample('component')">Example Component</span>
+                    <span class="example-link" onclick="loadExample('encoded')">Example Encoded</span>
+                </div>
+            </div>
+            <div class="panel-content">
+                <textarea id="input" placeholder="Paste your URL or text to encode/decode..."></textarea>
+            </div>
+        </div>
+
+        <!-- Output Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Output</h2>
+                <div class="controls">
+                    <button id="encodeBtn">Encode</button>
+                    <button id="encodeComponentBtn">Encode Component</button>
+                    <button id="decodeBtn">Decode</button>
+                    <button id="copyBtn" class="success">Copy</button>
+                    <button id="clearBtn" class="danger">Clear</button>
+                </div>
+            </div>
+            <div class="info-box">
+                <strong>Current operation:</strong> <span id="operationInfo">None</span>
+            </div>
+            <div class="panel-content">
+                <textarea id="output" placeholder="Encoded/decoded output will appear here..." readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle">
+        <span id="themeLabel">Auto</span>
+    </button>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const inputCharCount = document.getElementById('inputCharCount');
+        const operationInfo = document.getElementById('operationInfo');
+        const notification = document.getElementById('notification');
+
+        const encodeBtn = document.getElementById('encodeBtn');
+        const encodeComponentBtn = document.getElementById('encodeComponentBtn');
+        const decodeBtn = document.getElementById('decodeBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        const themeLabel = document.getElementById('themeLabel');
+        const themes = ['auto', 'light', 'dark'];
+        let currentThemeIndex = 0;
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('htmlToolsTheme');
+            if (savedTheme && themes.includes(savedTheme)) {
+                currentThemeIndex = themes.indexOf(savedTheme);
+            }
+            applyTheme();
+        }
+
+        function applyTheme() {
+            const theme = themes[currentThemeIndex];
+            if (theme === 'auto') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            themeLabel.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+            localStorage.setItem('htmlToolsTheme', theme);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            applyTheme();
+        });
+
+        loadTheme();
+
+        // Load saved input from localStorage
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('urlEncoderInput');
+            if (saved) {
+                input.value = saved;
+                updateInputStats();
+            }
+        });
+
+        // Auto-save input to localStorage
+        input.addEventListener('input', () => {
+            localStorage.setItem('urlEncoderInput', input.value);
+            updateInputStats();
+        });
+
+        // Update input stats
+        function updateInputStats() {
+            const text = input.value;
+            inputCharCount.textContent = `${text.length} characters`;
+        }
+
+        // Show notification
+        function showNotification(message, duration = 2000) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+
+        // Load examples
+        function loadExample(type) {
+            switch(type) {
+                case 'url':
+                    input.value = 'https://example.com/search?q=hello world&category=news';
+                    break;
+                case 'component':
+                    input.value = 'hello world & special chars: @#$%';
+                    break;
+                case 'encoded':
+                    input.value = 'https%3A%2F%2Fexample.com%2Fsearch%3Fq%3Dhello%20world';
+                    break;
+            }
+            updateInputStats();
+            localStorage.setItem('urlEncoderInput', input.value);
+        }
+
+        // Encode URL
+        function encodeURL(text) {
+            try {
+                const encoded = encodeURI(text);
+                return { success: true, result: encoded };
+            } catch (e) {
+                return { success: false, error: e.message };
+            }
+        }
+
+        // Encode URI Component
+        function encodeComponent(text) {
+            try {
+                const encoded = encodeURIComponent(text);
+                return { success: true, result: encoded };
+            } catch (e) {
+                return { success: false, error: e.message };
+            }
+        }
+
+        // Decode URL
+        function decodeURL(text) {
+            try {
+                // Try decodeURIComponent first (more aggressive), fallback to decodeURI
+                let decoded;
+                try {
+                    decoded = decodeURIComponent(text);
+                } catch {
+                    decoded = decodeURI(text);
+                }
+                return { success: true, result: decoded };
+            } catch (e) {
+                return { success: false, error: e.message };
+            }
+        }
+
+        // Button event handlers
+        encodeBtn.addEventListener('click', () => {
+            const text = input.value;
+            if (!text.trim()) {
+                showNotification('Nothing to encode');
+                return;
+            }
+
+            const result = encodeURL(text);
+            if (result.success) {
+                output.value = result.result;
+                operationInfo.textContent = 'encodeURI() - Encodes full URL';
+                showNotification('Encoded successfully');
+            } else {
+                output.value = `Error: ${result.error}`;
+                operationInfo.textContent = 'Error';
+                showNotification('Encoding failed');
+            }
+        });
+
+        encodeComponentBtn.addEventListener('click', () => {
+            const text = input.value;
+            if (!text.trim()) {
+                showNotification('Nothing to encode');
+                return;
+            }
+
+            const result = encodeComponent(text);
+            if (result.success) {
+                output.value = result.result;
+                operationInfo.textContent = 'encodeURIComponent() - Encodes URL components';
+                showNotification('Encoded successfully');
+            } else {
+                output.value = `Error: ${result.error}`;
+                operationInfo.textContent = 'Error';
+                showNotification('Encoding failed');
+            }
+        });
+
+        decodeBtn.addEventListener('click', () => {
+            const text = input.value;
+            if (!text.trim()) {
+                showNotification('Nothing to decode');
+                return;
+            }
+
+            const result = decodeURL(text);
+            if (result.success) {
+                output.value = result.result;
+                operationInfo.textContent = 'decodeURIComponent() - Decodes URL/components';
+                showNotification('Decoded successfully');
+            } else {
+                output.value = `Error: ${result.error}`;
+                operationInfo.textContent = 'Error';
+                showNotification('Decoding failed');
+            }
+        });
+
+        copyBtn.addEventListener('click', async () => {
+            const text = output.value;
+            if (!text || text === 'Encoded/decoded output will appear here...') {
+                showNotification('Nothing to copy');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(text);
+                showNotification('Copied to clipboard!');
+            } catch (e) {
+                showNotification('Failed to copy');
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            output.value = '';
+            operationInfo.textContent = 'None';
+            localStorage.removeItem('urlEncoderInput');
+            updateInputStats();
+            showNotification('Cleared');
+        });
+
+        // Auto-decode on paste if it looks encoded
+        input.addEventListener('paste', () => {
+            setTimeout(() => {
+                const text = input.value;
+                if (text.includes('%') && /^[A-Za-z0-9%._~:/?#[\]@!$&'()*+,;=-]*$/.test(text)) {
+                    const result = decodeURL(text);
+                    if (result.success && result.result !== text) {
+                        output.value = result.result;
+                        operationInfo.textContent = 'Auto-decoded (detected encoded URL)';
+                    }
+                }
+            }, 10);
+        });
+    </script>
+</body>
+</html>
