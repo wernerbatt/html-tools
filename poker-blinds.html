@@ -470,12 +470,22 @@
                         </select>
                     </div>
                 </div>
-                <div style="margin-top:10px">
-                    <div class="field-sublabel">Blind mode</div>
-                    <select id="blindMode">
-                        <option value="tournament">Tournament — auto-scale blinds from chip set</option>
-                        <option value="cash12">1/2 — start small, leave big chips in the box</option>
-                    </select>
+                <div class="field-row" style="margin-top:10px">
+                    <div>
+                        <div class="field-sublabel">Blind mode</div>
+                        <select id="blindMode">
+                            <option value="tournament">Tournament (auto-scale)</option>
+                            <option value="cash12">1/2 fixed blinds</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="field-sublabel">Profile</div>
+                        <select id="profile">
+                            <option value="steady">Steady — even pace</option>
+                            <option value="sitgo">Sit &amp; Go — slow build, sharp finish</option>
+                        </select>
+                    </div>
+                </div>
                 </div>
             </div>
 
@@ -550,6 +560,16 @@ function snapBB(target) {
     return CLEAN_BB.reduce((best, v) =>
         Math.abs(v - target) < Math.abs(best - target) ? v : best
     );
+}
+
+// Sit & Go profile: gentle early, sharp final third.
+// t=0 (level 1) → 1.4×, t=0.45 → 1.8×, t=0.72 → 2.5×
+function levelMultiplier(i, numLevels, profile) {
+    if (profile !== 'sitgo') return 1.8;
+    const t = i / Math.max(numLevels - 1, 1);
+    if (t < 0.45) return 1.4;
+    if (t < 0.72) return 1.8;
+    return 2.5;
 }
 
 function fmtNum(n) {
@@ -647,10 +667,11 @@ function calculate() {
     const targetMins  = parseInt(document.getElementById('gameLength').value);
     const levelMins   = parseInt(document.getElementById('levelDuration').value);
     const anteMode    = document.getElementById('anteMode').value;
+    const profile     = document.getElementById('profile').value;
 
     // Save settings
     const blindMode = document.getElementById('blindMode').value;
-    localStorage.setItem('pokerSettings', JSON.stringify({ numPlayers, targetMins, levelMins, anteMode, blindMode }));
+    localStorage.setItem('pokerSettings', JSON.stringify({ numPlayers, targetMins, levelMins, anteMode, blindMode, profile }));
 
     // Build valid denominations
     const denoms = chipData
@@ -729,7 +750,7 @@ function calculate() {
             stackBBs, phase,
         });
 
-        bb = snapBB(bb * 1.8);
+        bb = snapBB(bb * levelMultiplier(i, numLevels, profile));
     }
 
     // ── Render summary bar ────────────────────────────────────────────────────
@@ -901,9 +922,10 @@ function calculate() {
         set('levelDuration', saved.levelMins);
         set('anteMode',      saved.anteMode);
         set('blindMode',     saved.blindMode);
+        set('profile',       saved.profile);
     }
 
-    ['numPlayers', 'gameLength', 'levelDuration', 'anteMode', 'blindMode'].forEach(id => {
+    ['numPlayers', 'gameLength', 'levelDuration', 'anteMode', 'blindMode', 'profile'].forEach(id => {
         document.getElementById(id).addEventListener('change', saveAndCalc);
     });
 
