@@ -476,6 +476,7 @@
                         <select id="blindMode">
                             <option value="tournament">Tournament (auto-scale)</option>
                             <option value="cash12">1/2 fixed blinds</option>
+                            <option value="cash1020">10/20 fixed blinds</option>
                         </select>
                     </div>
                     <div>
@@ -548,7 +549,7 @@ const DEFAULT_CHIPS = [
 
 // Clean even BB values — all divisible by 2 so SB is always a whole number
 const CLEAN_BB = [
-    2, 4, 6, 8, 10, 12, 16, 20, 30, 40, 50, 100, 150, 200, 300, 400,
+    2, 4, 6, 8, 10, 12, 16, 20, 30, 40, 50, 60, 80, 100, 150, 200, 300, 400,
     500, 600, 800, 1000, 1200, 1500, 2000, 2500, 3000, 4000, 5000,
     6000, 8000, 10000, 12000, 15000, 20000, 25000, 30000, 50000
 ];
@@ -693,28 +694,25 @@ function calculate() {
         return;
     }
 
-    let dealDenoms, skipDenoms, startBB, skipReason;
+    let dealDenoms, skipSmall, skipLarge, startBB;
 
-    if (blindMode === 'cash12') {
-        // 1/2 mode: fixed starting BB, exclude chips too large to be practical.
-        // Heuristic: a chip is too large if it's worth more than 25× the BB (= 50).
-        // You'd rarely need more than one such chip to make a bet in the early levels.
-        startBB    = 2;
-        const maxUseful = startBB * 25;
-        dealDenoms  = denoms.filter(d => d.value <= maxUseful);
-        skipDenoms  = denoms.filter(d => d.value >  maxUseful);
-        skipReason  = `more than 25× the starting BB (${fmtNum(maxUseful)}) — awkward for early levels`;
-    } else {
-        // Tournament mode: auto-scale BB, exclude chips too small to post a blind cleanly.
-        // Heuristic: a chip is too small if you need more than 6 of them to make one BB.
-        const allPPV = denoms.reduce((s, d) => s + d.perPlayer * d.value, 0);
+    if (blindMode === 'tournament') {
+        // Auto-scale: compute BB from full chip set, then drop chips needing > 6 to post one BB.
+        const allPPV  = denoms.reduce((s, d) => s + d.perPlayer * d.value, 0);
         const roughBB = snapBB(allPPV / 70);
         const minUseful = roughBB / 6;
-        dealDenoms  = denoms.filter(d => d.value >= minUseful);
-        skipDenoms  = denoms.filter(d => d.value <  minUseful);
-        skipReason  = `worth less than BB÷6 (${fmtNum(Math.ceil(minUseful))}) — you'd need more than 6 to post one BB`;
-        const dealPPV = dealDenoms.reduce((s, d) => s + d.perPlayer * d.value, 0);
-        startBB = snapBB(dealPPV / 70);
+        dealDenoms = denoms.filter(d => d.value >= minUseful);
+        skipSmall  = denoms.filter(d => d.value <  minUseful);
+        skipLarge  = [];
+        startBB    = snapBB(dealDenoms.reduce((s, d) => s + d.perPlayer * d.value, 0) / 70);
+    } else {
+        // Fixed-blind modes: BB is preset; exclude chips too large (> BB×25) or too small (< BB/6).
+        startBB = blindMode === 'cash12' ? 2 : 20;
+        const maxUseful = startBB * 25;
+        const minUseful = startBB / 6;
+        dealDenoms = denoms.filter(d => d.value >= minUseful && d.value <= maxUseful);
+        skipSmall  = denoms.filter(d => d.value <  minUseful);
+        skipLarge  = denoms.filter(d => d.value >  maxUseful);
     }
 
     const totalChips     = dealDenoms.reduce((s, d) => s + d.count, 0);
@@ -811,11 +809,17 @@ function calculate() {
                 </tr>
             </tbody>
         </table>
-        ${skipDenoms.length > 0 ? `
+        ${skipSmall.length > 0 ? `
         <div class="leftover-note">
-            <strong>Leave in the box:</strong>
-            ${skipDenoms.map(d => `<span style="background:${d.color};width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:3px;border:1px solid rgba(0,0,0,0.2)"></span>${fmtNum(d.value)}s`).join(', ')}
-            — ${skipReason}.
+            <strong>Leave in the box (too small):</strong>
+            ${skipSmall.map(d => `<span style="background:${d.color};width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:3px;border:1px solid rgba(0,0,0,0.2)"></span>${fmtNum(d.value)}s`).join(', ')}
+            — need more than 6 to post one BB.
+        </div>` : ''}
+        ${skipLarge.length > 0 ? `
+        <div class="leftover-note" style="margin-top:6px">
+            <strong>Leave in the box (too large):</strong>
+            ${skipLarge.map(d => `<span style="background:${d.color};width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:3px;border:1px solid rgba(0,0,0,0.2)"></span>${fmtNum(d.value)}s`).join(', ')}
+            — more than 25× the starting BB, awkward for early levels.
         </div>` : ''}
         ${leftovers.length > 0 ? `
         <div class="leftover-note" style="margin-top:6px">
