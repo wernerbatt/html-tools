@@ -520,13 +520,13 @@
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const DEFAULT_CHIPS = [
-    { color: '#e8e8e8', value: 1,    count: 100 },
-    { color: '#ef4444', value: 5,    count: 50  },
-    { color: '#3b82f6', value: 10,   count: 50  },
-    { color: '#22c55e', value: 25,   count: 25  },
-    { color: '#1f2937', value: 100,  count: 25  },
-    { color: '#7c3aed', value: 500,  count: 25  },
-    { color: '#eab308', value: 1000, count: 25  },
+    { color: '#e8e8e8', value: 25,   count: 100 },
+    { color: '#ef4444', value: 100,  count: 50  },
+    { color: '#3b82f6', value: 250,  count: 50  },
+    { color: '#22c55e', value: 500,  count: 25  },
+    { color: '#1f2937', value: 1000, count: 25  },
+    { color: '#7c3aed', value: 2500, count: 25  },
+    { color: '#eab308', value: 5000, count: 25  },
 ];
 
 // Clean even BB values — all divisible by 2 so SB is always a whole number
@@ -580,7 +580,7 @@ themeToggle.onclick = () => { themeIdx = (themeIdx + 1) % THEMES.length; applyTh
 
 // ── Chip data ────────────────────────────────────────────────────────────────
 
-const CHIP_DATA_VERSION = 'v2';
+const CHIP_DATA_VERSION = 'v3';
 let chipData = JSON.parse(localStorage.getItem('pokerChipData_' + CHIP_DATA_VERSION) || 'null') || DEFAULT_CHIPS.map(c => ({...c}));
 
 function renderChipRows() {
