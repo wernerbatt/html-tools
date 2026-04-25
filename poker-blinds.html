@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Blind Calculator - Home Game Structure</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-dark: #1e1e1e;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --border-color: #e1e4e8;
+            --accent-color: #007acc;
+            --accent-hover: #005a9e;
+            --success-color: #2ea043;
+            --success-hover: #238636;
+            --danger-color: #dc3545;
+            --danger-hover: #c82333;
+            --warning-color: #b45309;
+            --green-accent: #2ea043;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0d1117;
+                --bg-secondary: #161b22;
+                --bg-dark: #1e1e1e;
+                --text-primary: #c9d1d9;
+                --text-secondary: #8b949e;
+                --border-color: #30363d;
+                --warning-color: #d97706;
+            }
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --text-primary: #24292e;
+            --text-secondary: #586069;
+            --border-color: #e1e4e8;
+            --warning-color: #b45309;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+            --warning-color: #d97706;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: var(--bg-dark);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--green-accent);
+        }
+        .header h1 { font-size: 24px; font-weight: 600; }
+        .header p { font-size: 14px; color: #ccc; margin-top: 5px; }
+        .header-nav { margin-top: 10px; }
+        .header-nav a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+        .header-nav a:hover { text-decoration: underline; }
+
+        .container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .panel-header h2 { font-size: 16px; font-weight: 600; }
+        .panel-meta { font-size: 12px; color: var(--text-secondary); }
+
+        .panel-body { padding: 20px; flex: 1; }
+
+        .field-group { margin-bottom: 20px; }
+        .field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+        }
+        .field-sublabel {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            appearance: auto;
+        }
+        select:focus, input[type="number"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0,122,204,0.12);
+        }
+        input[type="color"] {
+            width: 40px;
+            height: 34px;
+            padding: 2px 3px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            background: var(--bg-primary);
+        }
+
+        /* Chip table */
+        .chip-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .chip-table th {
+            text-align: left;
+            padding: 6px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .chip-table td { padding: 5px 4px; }
+        .chip-table td input[type="number"] { padding: 6px 8px; font-size: 13px; }
+        .chip-table td:first-child { width: 50px; }
+        .chip-table td:nth-child(2) { width: 80px; }
+        .chip-table td:nth-child(3) { }
+        .chip-table td:last-child { width: 36px; text-align: center; }
+
+        button {
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+        button:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,122,204,0.25); }
+        button:active { transform: translateY(0); }
+
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        .btn-danger { background: var(--danger-color); }
+        .btn-danger:hover { background: var(--danger-hover); box-shadow: 0 2px 6px rgba(220,53,69,0.25); }
+        .btn-success { background: var(--success-color); }
+        .btn-success:hover { background: var(--success-hover); box-shadow: 0 2px 6px rgba(46,160,67,0.25); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+        .btn-ghost:hover { background: var(--bg-secondary); color: var(--text-primary); box-shadow: none; transform: none; }
+
+        .add-denom-btn {
+            width: 100%;
+            margin-top: 8px;
+            background: transparent;
+            color: var(--accent-color);
+            border: 1px dashed var(--accent-color);
+            padding: 8px;
+            box-shadow: none;
+        }
+        .add-denom-btn:hover { background: rgba(0,122,204,0.06); transform: none; box-shadow: none; }
+
+        .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+        hr { border: none; border-top: 1px solid var(--border-color); margin: 20px 0; }
+
+        /* Summary bar */
+        .summary-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            flex-wrap: wrap;
+        }
+        .stat-block {
+            flex: 1;
+            min-width: 90px;
+            padding: 14px 16px;
+            text-align: center;
+            border-right: 1px solid var(--border-color);
+        }
+        .stat-block:last-child { border-right: none; }
+        .stat-value { font-size: 22px; font-weight: 700; color: var(--green-accent); line-height: 1; }
+        .stat-label { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+        /* Results sections */
+        .results-body { flex: 1; overflow-y: auto; }
+
+        .section {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section:last-child { border-bottom: none; }
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .results-table th {
+            text-align: left;
+            padding: 7px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .results-table td {
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        .results-table tbody tr:hover td { background: var(--bg-secondary); }
+
+        /* Blind schedule specific */
+        .phase-early td { background: rgba(46,160,67,0.06); }
+        .phase-mid td { background: rgba(230,162,0,0.07); }
+        .phase-late td { background: rgba(220,53,69,0.07); }
+        .phase-early:hover td { background: rgba(46,160,67,0.13) !important; }
+        .phase-mid:hover td { background: rgba(230,162,0,0.14) !important; }
+        .phase-late:hover td { background: rgba(220,53,69,0.13) !important; }
+
+        .level-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+        .time-cell { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+        .bb-val { font-weight: 700; }
+        .ante-val { color: var(--warning-color); font-weight: 600; }
+
+        .depth-wrap { display: flex; align-items: center; gap: 6px; }
+        .depth-bar {
+            height: 6px;
+            border-radius: 3px;
+            min-width: 2px;
+            flex-shrink: 0;
+            transition: width 0.3s;
+        }
+        .depth-bar.deep { background: var(--green-accent); }
+        .depth-bar.medium { background: #d97706; }
+        .depth-bar.shallow { background: var(--danger-color); }
+        .depth-label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+
+        .chip-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid rgba(128,128,128,0.3);
+            vertical-align: middle;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+        .chip-name { display: flex; align-items: center; }
+
+        .leftover-note {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+            border-left: 3px solid var(--warning-color);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .tip-box {
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .tip-box strong { color: var(--text-primary); }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 999;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .theme-toggle:hover { border-color: var(--accent-color); color: var(--accent-color); transform: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .stat-block { min-width: 80px; padding: 10px 12px; }
+            .stat-value { font-size: 18px; }
+        }
+
+        @media print {
+            .header-nav, .theme-toggle, .panel:first-child, .btn-row, .add-denom-btn { display: none !important; }
+            .container { grid-template-columns: 1fr; padding: 0; }
+            .panel { box-shadow: none; border: none; }
+            body { background: white; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Poker Blind Calculator</h1>
+    <p>Home game structure — starting stacks, chip distribution & blind schedule</p>
+    <div class="header-nav"><a href="index.html">← Back to Tools</a></div>
+</div>
+
+<div class="container">
+
+    <!-- Setup panel -->
+    <div class="panel">
+        <div class="panel-header"><h2>Setup</h2></div>
+        <div class="panel-body">
+
+            <div class="field-group">
+                <span class="field-label">Game Settings</span>
+                <div class="field-row">
+                    <div>
+                        <div class="field-sublabel">Players</div>
+                        <select id="numPlayers">
+                            <option value="2">2 players</option>
+                            <option value="3">3 players</option>
+                            <option value="4" selected>4 players</option>
+                            <option value="5">5 players</option>
+                            <option value="6">6 players</option>
+                            <option value="7">7 players</option>
+                            <option value="8">8 players</option>
+                            <option value="9">9 players</option>
+                            <option value="10">10 players</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="field-sublabel">Target length</div>
+                        <select id="gameLength">
+                            <option value="90">1.5 hours</option>
+                            <option value="120">2 hours</option>
+                            <option value="150">2.5 hours</option>
+                            <option value="180" selected>3 hours</option>
+                            <option value="210">3.5 hours</option>
+                            <option value="240">4 hours</option>
+                            <option value="300">5 hours</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-row" style="margin-top:10px">
+                    <div>
+                        <div class="field-sublabel">Level duration</div>
+                        <select id="levelDuration">
+                            <option value="10">10 min</option>
+                            <option value="15">15 min</option>
+                            <option value="20" selected>20 min</option>
+                            <option value="25">25 min</option>
+                            <option value="30">30 min</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="field-sublabel">Antes</div>
+                        <select id="anteMode">
+                            <option value="none">No antes</option>
+                            <option value="last3" selected>Last 3 levels</option>
+                            <option value="half">From halfway</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="field-group">
+                <span class="field-label">Your Chip Set</span>
+                <table class="chip-table">
+                    <thead>
+                        <tr>
+                            <th>Colour</th>
+                            <th>Value</th>
+                            <th>Total chips</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="chipRows"></tbody>
+                </table>
+                <button class="add-denom-btn" onclick="addChipRow()">+ Add denomination</button>
+            </div>
+
+            <hr>
+
+            <div class="btn-row">
+                <button class="btn-success" onclick="window.print()">Print Schedule</button>
+                <button class="btn-ghost" onclick="resetDefaults()">Reset defaults</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Results panel -->
+    <div class="panel">
+        <div class="panel-header">
+            <h2>Blind Structure</h2>
+            <span class="panel-meta" id="panelMeta"></span>
+        </div>
+        <div id="summaryBar" class="summary-bar"></div>
+        <div id="resultsBody" class="results-body">
+            <div class="empty-state">Configure your chip set to generate a blind structure.</div>
+        </div>
+    </div>
+
+</div>
+
+<button class="theme-toggle" id="themeToggle">Auto</button>
+
+<script>
+// ── Constants ────────────────────────────────────────────────────────────────
+
+const DEFAULT_CHIPS = [
+    { color: '#e8e8e8', value: 1,    count: 100 },
+    { color: '#ef4444', value: 5,    count: 50  },
+    { color: '#3b82f6', value: 10,   count: 50  },
+    { color: '#22c55e', value: 25,   count: 25  },
+    { color: '#1f2937', value: 100,  count: 25  },
+    { color: '#7c3aed', value: 500,  count: 25  },
+    { color: '#eab308', value: 1000, count: 25  },
+];
+
+// Clean even BB values — all divisible by 2 so SB is always a whole number
+const CLEAN_BB = [
+    10, 20, 50, 100, 150, 200, 300, 400, 500, 600, 800, 1000,
+    1200, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 8000, 10000,
+    12000, 15000, 20000, 25000, 30000, 50000
+];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function snapBB(target) {
+    if (target <= 0) return 10;
+    return CLEAN_BB.reduce((best, v) =>
+        Math.abs(v - target) < Math.abs(best - target) ? v : best
+    );
+}
+
+function fmtNum(n) {
+    return n.toLocaleString();
+}
+
+function fmtTime(min) {
+    const h = Math.floor(min / 60), m = min % 60;
+    if (h === 0) return `${m}m`;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+}
+
+// ── Theme ────────────────────────────────────────────────────────────────────
+
+const themeToggle = document.getElementById('themeToggle');
+const THEMES = ['auto', 'light', 'dark'];
+let themeIdx = 0;
+
+function applyTheme() {
+    const t = THEMES[themeIdx];
+    t === 'auto'
+        ? document.documentElement.removeAttribute('data-theme')
+        : document.documentElement.setAttribute('data-theme', t);
+    themeToggle.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+    localStorage.setItem('htmlToolsTheme', t);
+}
+
+themeToggle.onclick = () => { themeIdx = (themeIdx + 1) % THEMES.length; applyTheme(); };
+
+(function loadTheme() {
+    const saved = localStorage.getItem('htmlToolsTheme');
+    if (saved && THEMES.includes(saved)) themeIdx = THEMES.indexOf(saved);
+    applyTheme();
+})();
+
+// ── Chip data ────────────────────────────────────────────────────────────────
+
+const CHIP_DATA_VERSION = 'v2';
+let chipData = JSON.parse(localStorage.getItem('pokerChipData_' + CHIP_DATA_VERSION) || 'null') || DEFAULT_CHIPS.map(c => ({...c}));
+
+function renderChipRows() {
+    const tbody = document.getElementById('chipRows');
+    tbody.innerHTML = '';
+    chipData.forEach((chip, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <input type="color" value="${chip.color}"
+                    onchange="chipData[${i}].color = this.value; saveAndCalc();">
+            </td>
+            <td>
+                <input type="number" value="${chip.value || ''}" min="1" step="1" placeholder="e.g. 25"
+                    oninput="chipData[${i}].value = +this.value || 0; saveAndCalc();">
+            </td>
+            <td>
+                <input type="number" value="${chip.count || ''}" min="0" step="1" placeholder="e.g. 80"
+                    oninput="chipData[${i}].count = +this.value || 0; saveAndCalc();">
+            </td>
+            <td>
+                <button class="btn-sm btn-danger" onclick="removeChipRow(${i})" title="Remove">✕</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function addChipRow() {
+    chipData.push({ color: '#6b7280', value: 0, count: 0 });
+    renderChipRows();
+    const inputs = document.querySelectorAll('#chipRows .chip-table td:nth-child(2) input, #chipRows tr:last-child td:nth-child(2) input');
+    document.querySelectorAll('#chipRows tr:last-child td:nth-child(2) input')[0]?.focus();
+}
+
+function removeChipRow(i) {
+    chipData.splice(i, 1);
+    renderChipRows();
+    saveAndCalc();
+}
+
+function resetDefaults() {
+    chipData = DEFAULT_CHIPS.map(c => ({...c}));
+    renderChipRows();
+    saveAndCalc();
+}
+
+function saveAndCalc() {
+    localStorage.setItem('pokerChipData_' + CHIP_DATA_VERSION, JSON.stringify(chipData));
+    calculate();
+}
+
+// ── Main calculation ─────────────────────────────────────────────────────────
+
+function calculate() {
+    const numPlayers  = parseInt(document.getElementById('numPlayers').value);
+    const targetMins  = parseInt(document.getElementById('gameLength').value);
+    const levelMins   = parseInt(document.getElementById('levelDuration').value);
+    const anteMode    = document.getElementById('anteMode').value;
+
+    // Save settings
+    localStorage.setItem('pokerSettings', JSON.stringify({ numPlayers, targetMins, levelMins, anteMode }));
+
+    // Build valid denominations
+    const denoms = chipData
+        .filter(c => c.value > 0 && c.count > 0)
+        .sort((a, b) => a.value - b.value)
+        .map(c => ({
+            color:     c.color,
+            value:     +c.value,
+            count:     +c.count,
+            perPlayer: Math.floor(c.count / numPlayers),
+            leftover:  c.count % numPlayers,
+        }));
+
+    if (denoms.length === 0) {
+        document.getElementById('summaryBar').innerHTML = '';
+        document.getElementById('panelMeta').textContent = '';
+        document.getElementById('resultsBody').innerHTML =
+            '<div class="empty-state">Add chip denominations to generate a blind structure.</div>';
+        return;
+    }
+
+    const totalChips     = denoms.reduce((s, d) => s + d.count, 0);
+    const perPlayerValue = denoms.reduce((s, d) => s + d.perPlayer * d.value, 0);
+    const leftovers      = denoms.filter(d => d.leftover > 0);
+
+    // Starting BB: target ~70 big blinds
+    const startBB   = snapBB(perPlayerValue / 70);
+    const startDepth = Math.round(perPlayerValue / startBB);
+
+    // Number of levels
+    const numLevels = Math.ceil(targetMins / levelMins);
+
+    // Ante start level
+    let anteStart;
+    if      (anteMode === 'none')  anteStart = numLevels + 99;
+    else if (anteMode === 'half')  anteStart = Math.ceil(numLevels / 2) + 1;
+    else                           anteStart = Math.max(numLevels - 2, 1); // last 3
+
+    // Generate blind levels
+    const levels = [];
+    let bb = startBB;
+    for (let i = 0; i < numLevels; i++) {
+        const sb       = bb / 2;
+        const hasAnte  = (i + 1) >= anteStart;
+        const ante     = hasAnte ? snapBB(bb * 0.25) : 0;
+        const stackBBs = Math.round(perPlayerValue / bb);
+        const phaseFrac = i / (numLevels - 1 || 1);
+        const phase    = phaseFrac < 0.4 ? 'early' : phaseFrac < 0.72 ? 'mid' : 'late';
+
+        levels.push({
+            level: i + 1,
+            sb, bb, ante,
+            timeStart: i * levelMins,
+            timeEnd:   Math.min((i + 1) * levelMins, targetMins),
+            stackBBs, phase,
+        });
+
+        bb = snapBB(bb * 1.8);
+    }
+
+    // ── Render summary bar ────────────────────────────────────────────────────
+    document.getElementById('panelMeta').textContent = `${numLevels} levels × ${levelMins} min`;
+    document.getElementById('summaryBar').innerHTML = `
+        <div class="stat-block">
+            <div class="stat-value">${fmtNum(perPlayerValue)}</div>
+            <div class="stat-label">Stack / player</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-value">${fmtNum(startBB)}</div>
+            <div class="stat-label">Starting BB</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-value">${startDepth}</div>
+            <div class="stat-label">Starting depth</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-value">${fmtNum(totalChips)}</div>
+            <div class="stat-label">Total chips</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-value">${fmtTime(targetMins)}</div>
+            <div class="stat-label">Target length</div>
+        </div>
+    `;
+
+    // ── Render body sections ──────────────────────────────────────────────────
+    let html = '';
+
+    // Starting stack section
+    html += `
+    <div class="section">
+        <div class="section-title">Starting Stack per Player</div>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Chip</th>
+                    <th style="text-align:right">Chips</th>
+                    <th style="text-align:right">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${denoms.map(d => `
+                <tr>
+                    <td><span class="chip-name">
+                        <span class="chip-dot" style="background:${d.color}"></span>
+                        ${fmtNum(d.value)}
+                    </span></td>
+                    <td style="text-align:right;font-weight:600">${d.perPlayer}</td>
+                    <td style="text-align:right">${fmtNum(d.perPlayer * d.value)}</td>
+                </tr>
+                `).join('')}
+                <tr style="font-weight:700;background:var(--bg-secondary)">
+                    <td>Total</td>
+                    <td style="text-align:right">${denoms.reduce((s,d) => s + d.perPlayer, 0)} chips</td>
+                    <td style="text-align:right">${fmtNum(perPlayerValue)}</td>
+                </tr>
+            </tbody>
+        </table>
+        ${leftovers.length > 0 ? `
+        <div class="leftover-note">
+            <strong>Leftover (not dealt):</strong>
+            ${leftovers.map(d => `${d.leftover}× value ${fmtNum(d.value)}`).join(', ')}.
+            Keep as a spare stack for antes, or divide amongst players as a bonus.
+        </div>` : ''}
+    </div>`;
+
+    // Blind schedule section
+    html += `
+    <div class="section">
+        <div class="section-title">Blind Schedule</div>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Time</th>
+                    <th style="text-align:right">SB</th>
+                    <th style="text-align:right">BB</th>
+                    <th style="text-align:right">Ante</th>
+                    <th>Stack depth</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${levels.map(l => {
+                    const depthPct = Math.min(100, (l.stackBBs / startDepth) * 100);
+                    const barWidth = Math.max(2, depthPct * 0.7);
+                    const barClass = l.stackBBs > 30 ? 'deep' : l.stackBBs > 15 ? 'medium' : 'shallow';
+                    return `
+                    <tr class="phase-${l.phase}">
+                        <td><span class="level-num">${l.level}</span></td>
+                        <td class="time-cell">${fmtTime(l.timeStart)}–${fmtTime(l.timeEnd)}</td>
+                        <td style="text-align:right">${fmtNum(l.sb)}</td>
+                        <td style="text-align:right"><span class="bb-val">${fmtNum(l.bb)}</span></td>
+                        <td style="text-align:right">${l.ante
+                            ? `<span class="ante-val">${fmtNum(l.ante)}</span>`
+                            : `<span style="color:var(--text-secondary)">—</span>`
+                        }</td>
+                        <td>
+                            <div class="depth-wrap">
+                                <div class="depth-bar ${barClass}" style="width:${barWidth}px"></div>
+                                <span class="depth-label">${l.stackBBs} BB</span>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot" style="background:rgba(46,160,67,0.25)"></div>
+                Early — deep stacks, play hands
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:rgba(230,162,0,0.25)"></div>
+                Middle — watch stack depth
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:rgba(220,53,69,0.25)"></div>
+                Late — push/fold territory
+            </div>
+            ${anteMode !== 'none' ? `
+            <div class="legend-item">
+                <span class="ante-val">★</span> Ante = big blind ante (only BB posts)
+            </div>` : ''}
+        </div>
+    </div>`;
+
+    // Tips section
+    html += `
+    <div class="section">
+        <div class="section-title">Quick Reference</div>
+        <div class="tip-box">
+            <strong>Starting depth ${startDepth} BB</strong> —
+            ${startDepth >= 80
+                ? 'Deep stack game. Plenty of room for post-flop play in early levels.'
+                : startDepth >= 50
+                    ? 'Standard depth. Good balance of pre- and post-flop play.'
+                    : 'Shallow start. Expect push/fold sooner — keep levels shorter or add more chips.'
+            }
+            <br><br>
+            <strong>Below 20 BB</strong> — shove or fold preflop becomes optimal.
+            <strong>Below 10 BB</strong> — almost any two cards are a shove from the button.
+            ${anteMode !== 'none'
+                ? '<br><br><strong>Big blind ante</strong>: only the player posting BB puts in the ante for the whole table — simpler and faster than everyone antes individually.'
+                : ''
+            }
+        </div>
+    </div>`;
+
+    document.getElementById('resultsBody').innerHTML = html;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+
+(function init() {
+    // Restore saved settings
+    const saved = JSON.parse(localStorage.getItem('pokerSettings') || 'null');
+    if (saved) {
+        const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+        set('numPlayers',   saved.numPlayers);
+        set('gameLength',   saved.targetMins);
+        set('levelDuration', saved.levelMins);
+        set('anteMode',     saved.anteMode);
+    }
+
+    ['numPlayers', 'gameLength', 'levelDuration', 'anteMode'].forEach(id => {
+        document.getElementById(id).addEventListener('change', saveAndCalc);
+    });
+
+    renderChipRows();
+    calculate();
+})();
+</script>
+</body>
+</html>
